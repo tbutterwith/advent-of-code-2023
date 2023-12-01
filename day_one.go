@@ -59,16 +59,22 @@ func main() {
 				for _, num_string := range nums {
 					char_string := string(char)
 					char_lookahead := 0
+
+					// if it's a valid starting path
 					for strings.HasPrefix(num_string, char_string) {
 						num_char, ok := num_map[char_string]
+
+						// if we've matched, set the vars
 						if ok {
 							if first_digit == "" {
 								first_digit = num_char
 							}
 							last_digit = num_char
-						} else {
+							break
+						} else { // otherwise keep going
 							char_lookahead += 1
 						}
+						// don't go too far along the line
 						if len(line) <= i+char_lookahead {
 							break
 						}
