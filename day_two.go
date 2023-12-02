@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"unicode"
@@ -31,19 +30,20 @@ func main() {
 	// Create a scanner to read the file line by line
 	scanner := bufio.NewScanner(file)
 
-	game_sum := 0
+	power_sum := 0
 
 	for scanner.Scan() {
 		line := scanner.Text()
 		substrings := strings.Split(line, ":")
 
-		game_num_str := string(regexp.MustCompile(`\d+`).Find([]byte(substrings[0])))
-		game_num, _ := strconv.Atoi(game_num_str)
+		cube_counts := make(map[string]int)
+
+		cube_counts["red"] = 0
+		cube_counts["green"] = 0
+		cube_counts["blue"] = 0
 
 		count := ""
 		colour := ""
-
-		is_valid_game := true
 
 		for _, char := range substrings[1] {
 			str_char := string(char)
@@ -58,23 +58,20 @@ func main() {
 				colour += str_char
 			}
 
-			num_count, _ := strconv.Atoi(count)
-			if colour == "red" && num_count > 12 {
-				is_valid_game = false
-				break
-			} else if colour == "green" && num_count > 13 {
-				is_valid_game = false
-				break
-			} else if colour == "blue" && num_count > 14 {
-				is_valid_game = false
-				break
+			current_max, exists := cube_counts[colour]
+			if exists {
+				int_count, _ := strconv.Atoi(count)
+				if int_count > current_max {
+					cube_counts[colour] = int_count
+				}
 			}
 		}
 
-		if is_valid_game {
-			game_sum += game_num
-		}
+		// calculate powers
+		game_power := cube_counts["red"] * cube_counts["green"] * cube_counts["blue"]
+
+		power_sum += game_power
 	}
 
-	println(game_sum)
+	println(power_sum)
 }
