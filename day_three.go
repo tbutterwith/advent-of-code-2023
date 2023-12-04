@@ -4,9 +4,15 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"slices"
 	"strconv"
 	"unicode"
 )
+
+type coord struct {
+	x int
+	y int
+}
 
 func main() {
 	// Open the file
@@ -32,10 +38,90 @@ func main() {
 		schematics = append(schematics, line_slice)
 	}
 
-	search_schematic(schematics)
+	// search_schematic_for_all_nums(schematics)
+	get_gears(schematics)
 }
 
-func search_schematic(schematic [][]rune) {
+func get_gears(schematic [][]rune) {
+	gear_total := 0
+	for y, line := range schematic {
+		for x, char := range line {
+			if string(char) == "*" {
+				gear_total += calculate_gears(schematic, x, y)
+			}
+		}
+	}
+	fmt.Println(gear_total)
+}
+
+func calculate_gears(schematic [][]rune, x int, y int) int {
+	min_x := x - 1
+	max_x := x + 1
+
+	min_y := y - 1
+	max_y := y + 1
+
+	if min_x < 0 {
+		min_x = 0
+	}
+	if min_y < 0 {
+		min_y = 0
+	}
+
+	if max_x >= len(schematic[0]) {
+		max_x = len(schematic[0]) - 1
+	}
+	if max_y >= len(schematic) {
+		max_y = len(schematic) - 1
+	}
+
+	var found_nums []int
+	total := 0
+
+	for y := min_y; y <= max_y; y++ {
+		for x := min_x; x <= max_x; x++ {
+			char := schematic[y][x]
+			if unicode.IsDigit(char) {
+				// get the full number
+				full_num := get_full_num(schematic, x, y)
+				// put in found_nums if doesn't exist
+				if !slices.Contains(found_nums, full_num) {
+					found_nums = append(found_nums, full_num)
+				}
+			}
+		}
+	}
+
+	if len(found_nums) == 2 {
+		total = found_nums[0] * found_nums[1]
+	}
+
+	return total
+}
+
+func get_full_num(schematic [][]rune, x_coord int, y_coord int) int {
+	line := schematic[y_coord]
+
+	num_str := string(line[x_coord])
+	pointer := x_coord - 1
+
+	for pointer >= 0 && unicode.IsDigit(line[pointer]) {
+		num_str = string(line[pointer]) + num_str
+		pointer--
+	}
+
+	pointer = x_coord + 1
+	for pointer < len(line) && unicode.IsDigit(line[pointer]) {
+		num_str += string(line[pointer])
+		pointer++
+	}
+
+	num, _ := strconv.Atoi(num_str)
+
+	return num
+}
+
+func search_schematic_for_all_nums(schematic [][]rune) {
 
 	total := 0
 
