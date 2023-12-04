@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 	"strings"
 )
@@ -20,15 +19,30 @@ func main() {
 	// Create a scanner to read the file line by line
 	scanner := bufio.NewScanner(file)
 
-	total := 0
+	// total := 0
 
+	var cards []string
+	var queue []int
+
+	i := 0
 	for scanner.Scan() {
 		line := scanner.Text()
 		substrings := strings.Split(line, ":")
+		cards = append(cards, substrings[1])
+		queue = append(queue, i)
+		i++
+	}
 
-		game := strings.Split(substrings[1], "|")
+	total_cards := 0
 
-		fmt.Println(substrings[0])
+	for len(queue) > 0 {
+		next_id := queue[0]
+		queue = queue[1:]
+		total_cards += 1
+
+		game_row := cards[next_id]
+
+		game := strings.Split(game_row, "|")
 
 		winning_nums := strings.Split(game[0], " ")
 		card_nums := strings.Split(game[1], " ")
@@ -43,21 +57,12 @@ func main() {
 			}
 		}
 
-		if match_counter == 1 {
-			total += 1
-		} else {
-
-			additional_points := match_counter - 1
-			base := 1
-			if additional_points < 0 {
-				additional_points = 0
-				base = 0
-			}
-			match_points := base * (int(math.Pow(2, float64(additional_points))))
-
-			total += match_points
+		for i := 1; i <= match_counter; i++ {
+			queue = append(queue, next_id+i)
 		}
+
 	}
 
-	fmt.Println(total)
+	println(total_cards)
+
 }
