@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"sync"
 	"unicode"
 )
 
@@ -24,6 +25,20 @@ func main() {
 	file_lines := ReadFile("inputs/5.txt")
 
 	seeds := strings.Fields(strings.Split(file_lines[0], ":")[1])
+	seed_ranges := make([]struct {
+		start  int
+		length int
+	}, 0, 10)
+
+	for i := 0; i < len(seeds); i += 2 {
+		start, _ := strconv.Atoi(seeds[i])
+		length, _ := strconv.Atoi(seeds[i+1])
+		seed_ranges = append(seed_ranges, struct {
+			start  int
+			length int
+		}{start, length})
+	}
+
 	seed_to_soil = make(map[int]dest_tupe)
 	soil_to_fertiliser = make(map[int]dest_tupe)
 	fertiliser_to_water = make(map[int]dest_tupe)
@@ -32,7 +47,7 @@ func main() {
 	temp_to_humidity = make(map[int]dest_tupe)
 	humidity_to_loc = make(map[int]dest_tupe)
 
-	map_ids := []string{"soil", "fert", "water", "light", "temp", "humidity", "location"}
+	// map_ids := []string{"soil", "fert", "water", "light", "temp", "humidity", "location"}
 	maps := []map[int]dest_tupe{seed_to_soil, soil_to_fertiliser, fertiliser_to_water, water_to_light, light_to_temp, temp_to_humidity, humidity_to_loc}
 
 	map_iterator := 0
@@ -56,20 +71,35 @@ func main() {
 		}
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(seed_ranges))
+
+	for _, ranges := range seed_ranges {
+		go search_seed_groups(ranges.start, ranges.length, maps, &wg)
+	}
+
+	wg.Wait()
+}
+
+func search_seed_groups(start int, length int, maps []map[int]dest_tupe, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	lowest_seed_loc := -1
-	for _, seed_str := range seeds {
-		seed_num, _ := strconv.Atoi(seed_str)
+
+	fmt.Printf("Looking for %d values\n", length)
+
+	for seed_num := start; seed_num <= start+length; seed_num++ {
 
 		id := seed_num
-		fmt.Printf("Id is seed: %d\n", id)
 
-		for i, cur_map := range maps {
-			id = search(cur_map, id)
-			fmt.Printf("Id is %s: %d\n", map_ids[i], id)
+		progress := (((start + length) - seed_num) / (start + length)) * 100
+		if int(progress)%10 == 0 && int(progress) > 1 {
+			fmt.Printf("%d through \n", progress)
 		}
 
-		fmt.Printf("Location is %d\n", id)
-		fmt.Printf("\n\n\n")
+		for _, cur_map := range maps {
+			id = search(cur_map, id)
+		}
 		if id < lowest_seed_loc || lowest_seed_loc == -1 {
 			lowest_seed_loc = id
 		}
@@ -81,7 +111,7 @@ func main() {
 func search(lookup map[int]dest_tupe, num int) (id int) {
 	id = num
 
-	fmt.Printf("looking for id %d\n", id)
+	// fmt.Printf("looking for id %d\n", id)
 	for source, dest_pair := range lookup {
 		length := dest_pair.len
 
@@ -89,7 +119,7 @@ func search(lookup map[int]dest_tupe, num int) (id int) {
 			// it's a match
 
 			diff := id - source
-			fmt.Printf("id is %d, source is %d, length is %d, diff is %d\n", id, source, length, diff)
+			// fmt.Printf("id is %d, source is %d, length is %d, diff is %d\n", id, source, length, diff)
 			id = dest_pair.dest + diff
 
 			return
