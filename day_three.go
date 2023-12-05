@@ -9,11 +9,6 @@ import (
 	"unicode"
 )
 
-type coord struct {
-	x int
-	y int
-}
-
 func main() {
 	// Open the file
 	file, err := os.Open("inputs/3.txt")
@@ -99,7 +94,7 @@ func calculate_gears(schematic [][]rune, x int, y int) int {
 	return total
 }
 
-func get_full_num(schematic [][]rune, x_coord int, y_coord int) int {
+func get_full_num(schematic [][]rune, x_coord, y_coord int) (full_num int) {
 	line := schematic[y_coord]
 
 	num_str := string(line[x_coord])
@@ -116,9 +111,9 @@ func get_full_num(schematic [][]rune, x_coord int, y_coord int) int {
 		pointer++
 	}
 
-	num, _ := strconv.Atoi(num_str)
+	full_num, _ = strconv.Atoi(num_str)
 
-	return num
+	return
 }
 
 func search_schematic_for_all_nums(schematic [][]rune) {
@@ -165,7 +160,7 @@ func search_schematic_for_all_nums(schematic [][]rune) {
 	println(total)
 }
 
-func is_valid(schematic [][]rune, min_x int, min_y int, max_x int, max_y int) bool {
+func is_valid(schematic [][]rune, min_x, min_y, max_x, max_y int) (is_valid bool) {
 	if min_x < 0 {
 		min_x = 0
 	}
@@ -179,7 +174,7 @@ func is_valid(schematic [][]rune, min_x int, min_y int, max_x int, max_y int) bo
 	if max_y >= len(schematic) {
 		max_y = len(schematic) - 1
 	}
-	is_valid := false
+	is_valid = false
 	print("\n")
 	for y := min_y; y <= max_y; y++ {
 		for x := min_x; x <= max_x; x++ {
@@ -191,5 +186,5 @@ func is_valid(schematic [][]rune, min_x int, min_y int, max_x int, max_y int) bo
 		print("\n")
 	}
 
-	return is_valid
+	return
 }

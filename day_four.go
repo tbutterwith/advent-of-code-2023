@@ -44,14 +44,14 @@ func main() {
 
 		game := strings.Split(game_row, "|")
 
-		winning_nums := strings.Split(game[0], " ")
-		card_nums := strings.Split(game[1], " ")
+		winning_nums := strings.Fields(game[0])
+		card_nums := strings.Fields(game[1])
 
 		match_counter := 0
 
 		for _, num := range card_nums {
 			for _, winner := range winning_nums {
-				if num != "" && winner != "" && num == winner {
+				if num == winner {
 					match_counter += 1
 				}
 			}
