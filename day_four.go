@@ -1,23 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"strings"
 )
 
 func main() {
-	// Open the file
-	file, err := os.Open("inputs/4.txt")
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	defer file.Close()
-
-	// Create a scanner to read the file line by line
-	scanner := bufio.NewScanner(file)
+	input := ReadFile("inputs/4_short.txt")
 
 	// total := 0
 
@@ -25,8 +13,7 @@ func main() {
 	var queue []int
 
 	i := 0
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, line := range input {
 		substrings := strings.Split(line, ":")
 		cards = append(cards, substrings[1])
 		queue = append(queue, i)
