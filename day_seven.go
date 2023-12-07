@@ -23,7 +23,8 @@ const (
 type Card int
 
 const (
-	two Card = iota + 1
+	jack Card = iota + 1
+	two
 	three
 	four
 	five
@@ -32,7 +33,6 @@ const (
 	eight
 	nine
 	ten
-	jack
 	queen
 	king
 	ace
@@ -52,11 +52,8 @@ func main() {
 		first_hand_type := getHandType(first_cards)
 		second_hand_type := getHandType(second_cards)
 
-		log.Debugf("%s (%v), %s(%v)", first, first_hand_type, second, second_hand_type)
 		if first_hand_type == second_hand_type {
 			for i := 0; i < len(first_cards); i++ {
-
-				log.Debugf("%v:%v", first_cards[i], second_cards[i])
 				if first_cards[i] == second_cards[i] {
 					continue
 				}
@@ -78,19 +75,64 @@ func main() {
 	log.Info(total)
 }
 
-func getHandType(hand []Card) HandType {
-	hand_clone := make([]Card, len(hand))
-	copy(hand_clone, hand)
+func getHandType(original_hand []Card) HandType {
+	hand := make([]Card, len(original_hand))
+	copy(hand, original_hand)
 
-	sort.SliceStable(hand_clone, func(i, j int) bool {
-		return hand_clone[i] < hand_clone[j]
+	// count up the number of jacks, and create a new slice without them
+	j_count := 0
+	var hand_without_j []Card
+	for _, card := range hand {
+		if card == jack {
+			j_count += 1
+		} else {
+			hand_without_j = append(hand_without_j, card)
+		}
+	}
+
+	// count instances of the cards
+	card_counts := make(map[Card]int)
+	for _, card := range hand_without_j {
+		card_counts[card] += 1
+	}
+
+	// find the most common card, breaking any ties by taking the higher of the two
+	most_common_card := jack
+	counter := -1
+	for next_card, value := range card_counts {
+		if value > counter {
+			most_common_card = next_card
+			counter = value
+		} else if value == counter {
+			if next_card > most_common_card {
+				most_common_card = next_card
+				counter = value
+			}
+		}
+	}
+
+	// replace jacks with the new cards to make the best hand possible
+	rebuilt_hand := make([]Card, len(hand_without_j))
+	copy(rebuilt_hand, hand_without_j)
+
+	for i := 0; i < j_count; i++ {
+		rebuilt_hand = append(rebuilt_hand, most_common_card)
+	}
+
+	// Sort the hand
+	sort.SliceStable(rebuilt_hand, func(i, j int) bool {
+		return rebuilt_hand[i] < rebuilt_hand[j]
 	})
+	log.Debug(rebuilt_hand)
 
 	var matches []int
 
+	// count up the matches to decide how good the hand is
+	// n.b. now that we're in part two, I probably could have reused
+	// the map I've built above to do this but at least I know this method works
 	match_counter := 0
-	for i, card := range hand_clone {
-		if i+1 < len(hand_clone) && card == hand_clone[i+1] {
+	for i, card := range rebuilt_hand {
+		if i+1 < len(rebuilt_hand) && card == rebuilt_hand[i+1] {
 			match_counter += 1
 		} else if match_counter > 0 {
 			matches = append(matches, match_counter)
