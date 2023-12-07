@@ -1,9 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 func main() {
@@ -24,5 +25,5 @@ func main() {
 		}
 	}
 
-	fmt.Println(total)
+	log.Infof("Total: %d", total)
 }
