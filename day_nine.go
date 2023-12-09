@@ -32,7 +32,8 @@ func main() {
 	total := 0
 	for _, sequence := range sequences {
 		new_sequence := calc_history(sequence)
-		num := infer_new_nums_forward(new_sequence)
+		// num := infer_new_nums_forward(new_sequence)
+		num := infer_new_nums_backwards(new_sequence)
 
 		total += num
 	}
@@ -81,6 +82,33 @@ func get_diffs(row []int) (diffs []int) {
 		}
 	}
 
+	return
+}
+
+func infer_new_nums_backwards(sequence [][]int) (final_val int) {
+	is_first_row := true
+
+	for i := len(sequence) - 2; i >= 0; i-- {
+		prev_num := calc_prev_num(sequence[i], sequence[i+1], is_first_row)
+		sequence[i] = append([]int{prev_num}, sequence[i]...)
+		is_first_row = false
+	}
+
+	log.Debug(sequence)
+	first_seq := sequence[0]
+	final_val = first_seq[0]
+
+	log.Debug(final_val)
+	return
+}
+
+func calc_prev_num(row, prev_row []int, diff_is_zero bool) (next_num int) {
+	if diff_is_zero {
+		next_num = row[0]
+	}
+
+	diff := prev_row[0]
+	next_num = row[0] - diff
 	return
 }
 
