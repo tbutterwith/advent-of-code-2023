@@ -11,5 +11,5 @@ brew install golang
 ## Running
 
 ```sh
-go run day_<one>.go
+go run utilities.go day_<one>.go
 ```
